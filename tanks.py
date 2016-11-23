@@ -2,12 +2,34 @@ import pygame
 from pygame.locals import *
 import sys
 from board import Board
+from socketclient import ServerClient
+import SocketServer
 
 #initialie the pygame engine
 pygame.init()
 
 #first we need a screen to display all the thins, 800x800 is the resolution
 screen = pygame.display.set_mode((800, 800))
+
+#This class is a request handler
+#It has the handle method that fires when we recieve something from game server
+class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+    def handle(self):
+    	try:
+        	data = self.request.recv(1024)
+        	print data
+        except:
+        	print "Exception at server"
+        	
+#Make new instance of the serverclient class
+sc = ServerClient(ThreadedTCPRequestHandler)
+#start our listening server on port 7000
+sc.start_server()
+#connect to the game server, remember to replace the IP with 127.0.0.1
+#if you are using the same machine
+sc.connect_client("192.168.1.5", 6000)
+#send the JOIN command
+sc.send_message("JOIN#")
 
 #create a new board instane
 board = Board()
